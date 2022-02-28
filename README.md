@@ -37,16 +37,18 @@ $ python -m pip install python-dotenv
 3. In a python terminal, import `cryptography` and encrypt your private key
 
 ```py
->>>import cryptography
+>>>from cryptography.fernet import Fernet
 >>>key = Fernet.generate_key()
->>>fernet = Fernet(key.encode())
+>>>fernet = Fernet(key)
 >>>encMessage = fernet.encrypt('YOURKEYHERE'.encode())
 >>>encMessage.decode()
 ```
 
-4. Take the value in `encMessage`, create a file called `key.txt` and save the text in the file 
+4. Take the value printet from the `encMessage.decode()`, create a file called `key.txt`, save the text in the file and add the key.txt file to the root of the project.
 
-5. Open `.env.example` and replace the key with the key you generated in step 3. Save the file without .example at the end. 
+5. Run `key.decode()`, copy the output. 
+
+6. Open `.env.example` and replace the key with the output you just copied from step 5. Save the file without ".example" at the end. 
 
 6. Open the `hydrate.py` file and replace the string stored in `wallet_public_addr` with your own public wallet.
 
