@@ -56,7 +56,6 @@ while True:
         
         print(f"{timestampStr} Hydrated! {avail:.3f} added to deposit. Total deposit now {new_deposit:,.2f}")
         print(f"{timestampStr} Total value of your deposit is now ${total_value:,.2f}")
-        time.sleep(hydrate_sleep_seconds)
     else:
         if avail < min_hydrate_amount:
             print(f"{timestampStr} Only {avail:.3f} Drip is available for the minimum required amount: {min_hydrate_amount:.3f}. Sleeps..")
