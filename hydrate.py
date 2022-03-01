@@ -8,7 +8,7 @@ import time
 drip_contract_addr = "0xFFE811714ab35360b67eE195acE7C10D93f89D8C"
 wallet_public_addr = "0x361472B5784e83fBF779b015f75ea0722741f304"
 min_hydrate_amount = 0.25
-loop_sleep_seconds = 60*10
+loop_sleep_seconds = 60
 start_polling_threshold_in_seconds = 60*10
 
 # load private key
