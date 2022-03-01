@@ -7,7 +7,7 @@ import time
 
 drip_contract_addr = "0xFFE811714ab35360b67eE195acE7C10D93f89D8C"
 wallet_public_addr = "0x361472B5784e83fBF779b015f75ea0722741f304"
-min_hydrate_amount = 0.5
+min_hydrate_amount = 0.25
 loop_sleep_seconds = 60*10
 start_polling_threshold_in_seconds = 60*10
 
@@ -81,7 +81,7 @@ while True:
         print(f"{timestampStr} Available to hydrate: {avail:.3f}")
         print(f"{timestampStr} Drip per second: {dripPerSecond:.8f}")
         print(f"{timestampStr} Until next hydration: {buildTimer(secondsUntilHydration)}")
-        print(f"{timestampStr} Start hydration polling {(start_polling_threshold_in_seconds / 60):.0f} min before next hydration")
+        print(f"{timestampStr} Start polling each {(loop_sleep_seconds / 60)} minute {(start_polling_threshold_in_seconds / 60):.0f} minutes before next hydration")
         print("************************")
 
     countdown(int(sleep))
