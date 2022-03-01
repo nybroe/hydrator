@@ -41,7 +41,7 @@ def buildTimer(t):
 
 def countdown(t):
     while t:
-        print(f"Start polling in: {buildTimer(t)}", end="\r")
+        print(f"Next poll in: {buildTimer(t)}", end="\r")
         time.sleep(1)
         t -= 1
 
