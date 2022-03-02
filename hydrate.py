@@ -7,7 +7,6 @@ import time
 
 drip_contract_addr = "0xFFE811714ab35360b67eE195acE7C10D93f89D8C"
 wallet_public_addr = "0x361472B5784e83fBF779b015f75ea0722741f304"
-min_hydrate_amount = 0.25
 loop_sleep_seconds = 60
 start_polling_threshold_in_seconds = 60*10
 
@@ -21,6 +20,23 @@ faucet_abi = json.load(f)
 # create contract
 faucet_contract = c.connect_to_contract(drip_contract_addr, faucet_abi)
 
+# cycle class
+class cycleItem: 
+    def __init__(self, id, type, minimumDrip): 
+        self.id = id 
+        self.type = type
+        self.minimumDrip = minimumDrip
+
+cycle = [] 
+cycle.append( cycleItem(1, "hydrate", 0.04) )
+cycle.append( cycleItem(2, "hydrate", 0.04) )
+cycle.append( cycleItem(3, "hydrate", 0.04) )
+cycle.append( cycleItem(4, "hydrate", 0.04) )
+cycle.append( cycleItem(5, "hydrate", 0.04) )
+cycle.append( cycleItem(6, "claim", 0.04) )
+cycle.append( cycleItem(7, "claim", 0.04) )
+nextCycleId = 1
+
 def deposit_amount(addr):
     user_totals = faucet_contract.functions.userInfoTotals(addr).call()
     return user_totals[1]/1000000000000000000
@@ -30,6 +46,10 @@ def available(addr):
 
 def hydrate():
     txn = faucet_contract.functions.roll().buildTransaction(c.get_tx_options(wallet_public_addr, 500000))
+    return c.send_txn(txn, wallet_private_key)
+
+def claim():
+    txn = faucet_contract.functions.claim().buildTransaction(c.get_tx_options(wallet_public_addr, 500000))
     return c.send_txn(txn, wallet_private_key)
 
 def buildTimer(t):
@@ -45,39 +65,77 @@ def countdown(t):
         time.sleep(1)
         t -= 1
 
+def findCycleMinimumDrip(cycleId):
+    for x in cycle:
+        if x.id == cycleId:
+            return x.minimumDrip
+            break
+        else:
+            x = None
+
+def findCycleType(cycleId):
+    for x in cycle:
+        if x.id == cycleId:
+            return x.type
+            break
+        else:
+            x = None
+
+def getNextCycleId(currentCycleId):
+    cycleLength = len(cycle)
+    if currentCycleId == cycleLength:
+        return 1
+    else:
+        return currentCycleId + 1
+
     
 # create infinate loop that checks contract every set sleep time
+nextCycleType = findCycleType(nextCycleId)
 while True:
     deposit = deposit_amount(wallet_public_addr)
-    #hydrate_amount = deposit * .01
     avail = available(wallet_public_addr)
     dateTimeObj = datetime.now()
     timestampStr = dateTimeObj.strftime("[%d-%b-%Y (%H:%M:%S)]")
 
+    cycleMinimumDrip = findCycleMinimumDrip(nextCycleId)
+
     dripPerDay = deposit * 0.01
     dripPerSecond = dripPerDay / 24 / 60 / 60
-    secondsUntilHydration = (min_hydrate_amount - avail) / dripPerSecond
+    secondsUntilHydration = (cycleMinimumDrip - avail) / dripPerSecond
     
     sleep = loop_sleep_seconds
 
     if secondsUntilHydration > start_polling_threshold_in_seconds:
         sleep = secondsUntilHydration - start_polling_threshold_in_seconds
     
-    if avail > min_hydrate_amount:
-        hydrate()
+    if avail > cycleMinimumDrip:
+        if nextCycleType == "hydrate":
+            hydrate()
+        if nextCycleType == "claim":
+            claim()
+        
         new_deposit = deposit_amount(wallet_public_addr)
         drip_price = get_drip_price()
         total_value = new_deposit * drip_price
 
-        print("********** HYDARTED *******")
-        print(f"{timestampStr} Added to deposit: {avail:.3f}")
+        if nextCycleType == "hydrate":
+            print("********** HYDRATED *******")
+            print(f"{timestampStr} Added to deposit: {avail:.3f}")
+        if nextCycleType == "claim":
+            print("********** CLAIMED ********")
+            print(f"{timestampStr} Claimed {avail:.3f} drip!")
+        
         print(f"{timestampStr} New total deposit: {new_deposit:,.2f}")
         print(f"{timestampStr} New total value: {total_value:,.2f}")
+
+        nextCycleId = getNextCycleId(nextCycleId)
+        nextCycleType = findCycleType(nextCycleId)
+        print(f"{timestampStr} Next cycle type will be: {nextCycleType}")
         print("***************************")
     else:
         print("********** STATS *******")
         print(f"{timestampStr} Deposit: {deposit:.3f}")
-        print(f"{timestampStr} Minimum hydrate amount: {min_hydrate_amount:.3f}")
+        print(f"{timestampStr} Minimum hydrate amount: {cycleMinimumDrip:.3f}")
         print(f"{timestampStr} Available to hydrate: {avail:.3f}")
         print(f"{timestampStr} Drip per second: {dripPerSecond:.8f}")
         print(f"{timestampStr} Until next hydration: {buildTimer(secondsUntilHydration)}")
