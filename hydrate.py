@@ -27,14 +27,15 @@ class cycleItem:
         self.type = type
         self.minimumDrip = minimumDrip
 
+# cycle types are "hydrate" or "claim"
 cycle = [] 
 cycle.append( cycleItem(1, "hydrate", 0.04) )
 cycle.append( cycleItem(2, "hydrate", 0.04) )
 cycle.append( cycleItem(3, "hydrate", 0.04) )
 cycle.append( cycleItem(4, "hydrate", 0.04) )
 cycle.append( cycleItem(5, "hydrate", 0.04) )
-cycle.append( cycleItem(6, "claim", 0.04) )
-cycle.append( cycleItem(7, "claim", 0.04) )
+cycle.append( cycleItem(6, "hydrate", 0.04) )
+cycle.append( cycleItem(7, "hydrate", 0.04) )
 nextCycleId = 1
 
 def deposit_amount(addr):
